@@ -422,11 +422,9 @@ impl Network {
 
             if self.gossip {
                 if let Some(idx) = idx {
-                    zenoh_runtime::ZRuntime::Net.block_in_place(
-                        strong_runtime
-                            .start_conditions()
-                            .add_peer_connector_zid(zid),
-                    );
+                    strong_runtime
+                        .start_conditions()
+                        .add_peer_connector_zid(zid);
                     if self.gossip_multihop || self.links.values().any(|link| link.zid == zid) {
                         self.send_on_links(
                             vec![(
@@ -457,8 +455,7 @@ impl Network {
                                 {
                                     runtime
                                         .start_conditions()
-                                        .terminate_peer_connector_zid(zid)
-                                        .await;
+                                        .terminate_peer_connector_zid(zid);
                                 }
                             });
                         }
@@ -467,11 +464,9 @@ impl Network {
             }
         }
         if (!self.wait_declares) || src_whatami != WhatAmI::Peer {
-            zenoh_runtime::ZRuntime::Net.block_in_place(
-                strong_runtime
-                    .start_conditions()
-                    .terminate_peer_connector_zid(src),
-            );
+            strong_runtime
+                .start_conditions()
+                .terminate_peer_connector_zid(src);
         }
     }
 

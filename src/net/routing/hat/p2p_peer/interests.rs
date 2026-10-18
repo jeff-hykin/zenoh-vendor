@@ -276,16 +276,13 @@ impl HatInterestTrait for HatCode {
 
     fn declare_final(&self, tables: &mut Tables, face: &mut Arc<FaceState>, id: InterestId) {
         if id == INITIAL_INTEREST_ID {
-            zenoh_runtime::ZRuntime::Net.block_in_place(async move {
-                if let Some(runtime) = &tables.runtime {
-                    if let Some(runtime) = runtime.upgrade() {
-                        runtime
-                            .start_conditions()
-                            .terminate_peer_connector_zid(face.zid)
-                            .await
-                    }
+            if let Some(runtime) = &tables.runtime {
+                if let Some(runtime) = runtime.upgrade() {
+                    runtime
+                        .start_conditions()
+                        .terminate_peer_connector_zid(face.zid)
                 }
-            });
+            }
         }
     }
 }
