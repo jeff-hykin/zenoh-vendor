@@ -1,20 +1,29 @@
 # zenoh-vendor
 
-The `zenoh` crate from crates.io with one routing fix, used by
+The `zenoh` crate from crates.io with two routing fixes, used by
 [zenoh-deno](https://github.com/jeff-hykin/zenoh-deno). Each patched version is a tag, with the crate at
 the repository root:
 
 | tag | crate |
 |---|---|
-| `zenoh-1.10.1-patch.1` | zenoh 1.10.1 |
-| `zenoh-1.6.2-patch.1` | zenoh 1.6.2 |
+| `zenoh-1.10.1-patch.2` | zenoh 1.10.1, both fixes |
+| `zenoh-1.6.2-patch.2` | zenoh 1.6.2, both fixes |
+| `zenoh-1.10.1-patch.1` | zenoh 1.10.1, the interest fix only |
+| `zenoh-1.6.2-patch.1` | zenoh 1.6.2, the interest fix only |
 
 ```toml
 [patch.crates-io]
-zenoh = { git = "https://github.com/jeff-hykin/zenoh-vendor", tag = "zenoh-1.10.1-patch.1" }
+zenoh = { git = "https://github.com/jeff-hykin/zenoh-vendor", tag = "zenoh-1.10.1-patch.2" }
 ```
 
-Everything else is unchanged from the published crate; the changed lines are marked `zenoh-deno patch`.
+Everything else is unchanged from the published crate; the interest fix's lines are marked `zenoh-deno patch`.
+
+The second fix (patch.2) is upstream's for a startup deadlock,
+[eclipse-zenoh/zenoh 646f2d1b](https://github.com/eclipse-zenoh/zenoh/commit/646f2d1b730e584a570015a77bee9f6db08be9d1)
+(issue [2581](https://github.com/eclipse-zenoh/zenoh/issues/2581)), merged after 1.10.1 shipped: during
+gossip autoconnect the RX thread held `ctrl_lock` and parked in `block_in_place` on the `StartConditions`
+mutex while the Net runtime's only worker waited on `ctrl_lock`, so a session could freeze at startup.
+It applies to 1.10.1 as is; on 1.6.2 it is hand-ported to the `p2p_peer` hat.
 ## The bug
 
 A client (or peer) declares a publisher, so it sends the router an *interest* in that key's
